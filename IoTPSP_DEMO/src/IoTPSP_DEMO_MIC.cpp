@@ -24,7 +24,8 @@ testResult testMIC(OledHmi* ui, Button* encoderSwitch) {
 	const char* title = "MIC MAX9814 DEMO";
 	const char* description = "Signal = ";
 	const char* istruction = "Make some noise!";
-	const char* noMicMessage = "Check MIC connection!";
+	//const char* noMicMessage = "Check MIC connection!";
+	const char* noMicMessage = "";
 
 	String displayMessage = String(noMicMessage);
 

@@ -30,18 +30,15 @@ bool firstRun = true;
 bool runDemo = false;
 bool encoderLastA = LOW;
 bool currentEncA = LOW;
-bool EncoderPositionChangedFlag = false;
 DemoMenu mainMenu;
 tests demoSelection;
 unsigned long lastEncChange = 0;
 Button encoderSwitch(ENC_SW_GPIO, 25);
 int encoderSelection = 0;
-bool encoderInterruptArmed = false;
 int encoderDirection = 0;
 
-//Button encoderA(ENC_A_GPIO, 1);
-//Button encoderB(ENC_B_GPIO, 1);
-
+#define USE_INTERRUPTS	// comment this line to disable interrupts on A and B encoder channels 
+						// and use simple encoder signal handling
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -53,11 +50,10 @@ void setup() {
 	pinMode(ENC_A_GPIO, INPUT_PULLUP);
 	pinMode(ENC_B_GPIO, INPUT_PULLUP);
 
-	
+#ifdef USE_INTERRUPTS
 	attachInterrupt(digitalPinToInterrupt(ENC_A_GPIO), handleEncoderAchange, CHANGE);
 	attachInterrupt(digitalPinToInterrupt(ENC_B_GPIO), handleEncoderBchange, CHANGE);
-
-	encoderInterruptArmed = true;
+#endif
 
 	Serial.begin(115200);
 	Serial.println();
@@ -136,17 +132,17 @@ void loop() {
 				testMP3(&ui, &encoderSwitch);
 				break;
 
-			case 's':
-				//testSDCARD
-				break;
-
-			case 'n':
-				//testLDR
-				break;
-
-			case 'w':
-				//testMOTOR
-				break;
+			//case 's':
+			//	//testSDCARD
+			//	break;
+			//
+			//case 'n':
+			//	//testLDR
+			//	break;
+			//
+			//case 'w':
+			//	//testMOTOR
+			//	break;
 
 			default:
 				Serial.println();
@@ -162,14 +158,30 @@ void loop() {
 		}
 	}
 	
-	
+#ifndef USE_INTERRUPTS
+	currentEncA = digitalRead(ENC_A_GPIO);
+	if ((encoderLastA == LOW) && (currentEncA == HIGH))
+	{
+		if (digitalRead(ENC_B_GPIO) == LOW) {
+			encoderPosition++;
+		}
+		else {
+			encoderPosition--;
+		}
+		lastEncChange = millis();
+	}
+	encoderLastA = currentEncA;
+	encoderSelection = encoderPosition;
+#endif
+
+#ifdef USE_INTERRUPTS
 	if (millis() - lastEncChange > 100) {
 		encoderSelection += encoderDirection;
 		encoderDirection = 0;
 		lastEncChange = millis();
 	}
-
-	Serial.println(encoderSelection);
+#endif
+	//Serial.println(encoderSelection);
 
 	if (encoderSelection < 0)
 		encoderSelection = 0;
@@ -187,7 +199,7 @@ void loop() {
 	encoderSwitch.update();
 	if (encoderSwitch.isRising())
 	{
-		demoSelection = mainMenu.getMenuItem(encoderPosition);
+		demoSelection = mainMenu.getMenuItem(encoderSelection);
 		runDemo = true;
 	}
 
