@@ -7,49 +7,62 @@
 
 
 //**************** test LEDs **********************
-constexpr int nTimes = 10; //n times to blink leds
 
-testTypeResult testLEDs() {
-	//init D11 D12 D13
-	constexpr tests testType = LEDs;
+testResult testLEDs(OledHmi* ui, Button* encoderSwitch) {
 
+	bool exitDemo = false;
+	constexpr int dly = 400;
+	unsigned long lstMillis = millis();
 	pinMode(GRN_LED_GPIO, OUTPUT);
 	pinMode(RED_LED_GPIO, OUTPUT);
-	//pinMode(13, INPUT);
+	pinMode(ENC_SW_GPIO, INPUT_PULLUP);
 
-	int i = 0; //counter
-	int stato = 0; //define state machine
+	const char* title = "LEDs DEMO";
+	const char* description = "LED = ";
 
-	Serial.print("Testing LEDs: send x to stop");
+	Serial.print(title);
+	Serial.println("press ENC switch to exit");
+	Serial.println("send 'x' to exit");
 	Serial.println();
-	while (i < nTimes) {
 
-		if (abortCurrentTest()) {
-			restoreUsedPins(GRN_LED_GPIO, RED_LED_GPIO);
-			return { testType, TEST_ABORTED };
+
+	int state = 0; //define state machine
+
+	while (!exitDemo) {
+		unsigned long elapsed = millis() - lstMillis;
+		if (elapsed>dly)
+		{
+			lstMillis = millis();
+			if (state == 0)
+				state = 1;
+			else
+				state = 0;
 		}
 
-
-		switch (stato) {
+		switch (state) {
 		case 0:
 			digitalWrite(GRN_LED_GPIO, HIGH);
 			digitalWrite(RED_LED_GPIO, LOW);
-			delay(100);
-			stato = 1;
+			ui->displayDemoScreen(title, description, String("GREEN"));
 			break;
 		case 1:
 			digitalWrite(RED_LED_GPIO, HIGH);
 			digitalWrite(GRN_LED_GPIO, LOW);
-			delay(100);
-			stato = 0;
-			i = i + 1;
+			ui->displayDemoScreen(title, description, String("RED"));
 			break;
 		}
 
+		if (abortCurrentTest())
+			exitDemo = true;
+
+		encoderSwitch->update();
+		if (encoderSwitch->isRising())
+			exitDemo = true;
+
 	}
-	digitalWrite(GRN_LED_GPIO, HIGH);
-	digitalWrite(RED_LED_GPIO, HIGH);
+	digitalWrite(GRN_LED_GPIO, LOW);
+	digitalWrite(RED_LED_GPIO, LOW);
 
 	restoreUsedPins(RED_LED_GPIO, GRN_LED_GPIO);
-	return { testType, TEST_DONE_OK }; //return with no error
+	return TEST_DONE_OK; //return with no error
 }

@@ -1,12 +1,7 @@
 #pragma once
-
-#include "arduino.h"
-#include "IoTPSP_DEMO_pin_definition.h"
-
-
+#include "Bounce2.h"
 
 enum tests {
-	ALL,
 	LEDs,
 	TOUCH,
 	ENCODER,
@@ -22,33 +17,7 @@ enum tests {
 	RTCDS,
 	LDRxTC,
 	MOTOR,
-	LEVELSHIFTER,
-	DIGITALJ3J34
-};
-
-enum testState {
-	START_TEST,
-	TEST_LEDs,
-	TEST_POT,
-	TEST_TOUCH,
-	TEST_ENCODER,
-	TEST_OLED,
-	TEST_LCD,
-	TEST_RELAY,
-	TEST_HCSR04,
-	TEST_DHTxx,
-	TEST_MIC,
-	TEST_MP3,
-	TEST_END,
-	TEST_DONE,
-	TEST_SDCARD,
-	TEST_RTCDS,
-	TEST_LDRxTC,
-	TEST_MOTOR,
-	TEST_LEVELSHIFTER,
-	TEST_DIGITALJ3J34,
-	ABORT,
-	ERROR
+	SERVO
 };
 
 enum testResult {
@@ -58,20 +27,72 @@ enum testResult {
 	TEST_RUNNING = 99
 };
 
-struct testTypeResult {
-	tests testType;
-	testResult result;
+
+constexpr int nItems = 9;
+class DemoMenu {
+private:
+
+	//DemoMenuItem items[] = { {LEDs, "LEDs"}};
+	
+	tests menuItems[nItems] = { 
+		LEDs, 
+		TOUCH, 
+		POT,
+		RTCDS,
+		RELAY,
+		HCSR04,
+		DHTxx,
+		MIC,
+		MP3
+		//LDRxTC,
+		//SDCARD,
+		//SERVO,
+		//MOTOR
+	};
+
+	const char* menuItemsStr[nItems] = {
+		"LEDs",
+		"TOUCH",
+		"POT",
+		"RTC",
+		"RELAY",
+		"HC-SR04",
+		"DHT22",
+		"MIC MAX9814",
+		"MP3 PLAYER"
+		//"LDR/xTC",
+		//"SDCARD",
+		//"SERVO",
+		//"MOTOR"
+	};
+	
+public:
+	tests getMenuItem(int index);
+	int getMenuItemsN();
+	const char* getMenuItemString(int index);
+
 };
 
+class Button {
+private:
+	int m_btnGpio;
+	Bounce m_button;
 
+public:
+	Button(int btnGpio, int debounceInterval);
+	void update();
+	bool isRising();
+	bool isFalling();
+	bool state();
+};
 
-testResult testIoTPSP(tests testToBeDone);
 testResult abortCurrentTest();
-testState setNextState(int& i, tests& testToBeDone, testTypeResult(*currentTest)());
 void restoreUsedPins(int p1);
 void restoreUsedPins(int p1, int p2);
 void restoreUsedPins(int p1, int p2, int p3);
 void restoreAllPins();
-//testResult initTest(const char* testName);
-testResult initTest(const char* testName, bool waitOK = true, bool waitStart = true);
-void printTestOK(const char* testName);
+void initTest(const char* testName);
+
+
+
+

@@ -1,167 +1,7 @@
+#include "IoTPSP_DEMO_pin_definition.h"
 #include "IoTPSP_DEMO_testing.h"
-#include "IoTPSP_DEMO_testSequence.h"
-#include "IoTPSP_DEMO_POT.h"
-#include "IoTPSP_DEMO_LEDs.h"
-#include "IoTPSP_DEMO_ENC.h"
-#include "IoTPSP_DEMO_TOUCH.h"
-#include "IoTPSP_DEMO_OLED_HMI.h"
+#include "Bounce2.h"
 
-testResult testIoTPSP(tests testToBeDone) {
-
-	testState currentState = START_TEST;
-	testResult currentTestResult = TEST_DONE_OK;
-	int testIndex = 0;
-
-	Serial.println();
-
-	if (testToBeDone == ALL) currentState = START_TEST;
-	if (testToBeDone == LEDs) currentState = TEST_LEDs;
-	if (testToBeDone == POT) currentState = TEST_POT;
-	if (testToBeDone == TOUCH) currentState = TEST_TOUCH;
-	if (testToBeDone == ENCODER) currentState = TEST_ENCODER;
-	if (testToBeDone == OLED) currentState = TEST_OLED;
-	if (testToBeDone == LCD) currentState = TEST_LCD;
-	if (testToBeDone == RELAY) currentState = TEST_RELAY;
-	if (testToBeDone == HCSR04) currentState = TEST_HCSR04;
-	if (testToBeDone == DHTxx) currentState = TEST_DHTxx;
-	if (testToBeDone == MIC) currentState = TEST_MIC;
-	if (testToBeDone == MP3) currentState = TEST_MP3;
-	if (testToBeDone == SDCARD) currentState = TEST_SDCARD;
-	if (testToBeDone == RTCDS) currentState = TEST_RTCDS;
-	if (testToBeDone == LDRxTC) currentState = TEST_LDRxTC;
-	if (testToBeDone == MOTOR) currentState = TEST_MOTOR;
-	if (testToBeDone == LEVELSHIFTER) currentState = TEST_LEVELSHIFTER;
-	if (testToBeDone == DIGITALJ3J34) currentState = TEST_DIGITALJ3J34;
-
-	//state machine
-	while (currentState != TEST_DONE) {
-		// here code to be execute each time that the state changes
-		Serial.println();
-		Serial.println("-----------------------------------");
-
-		switch (currentState) {
-
-		case START_TEST: //starting testing procedure
-			Serial.println("Starting testing procedure...");
-			Serial.println();
-			//currentState = testSequence[testIndex]; //TEST_LEDs; //set next state
-			break;
-
-		case TEST_LEDs:
-			currentState = setNextState(testIndex, testToBeDone, testLEDs);
-			break;
-
-		case TEST_POT:
-			currentState = setNextState(testIndex, testToBeDone, testPOT);
-			break;
-
-		case TEST_TOUCH:
-			currentState = setNextState(testIndex, testToBeDone, testTOUCH);
-			break;
-
-		case TEST_ENCODER:
-			currentState = setNextState(testIndex, testToBeDone, testENCODER);
-			break;
-
-		case TEST_OLED:
-			currentState = setNextState(testIndex, testToBeDone, testOLED);
-			break;
-
-		case TEST_LCD:
-			//currentState = setNextState(testIndex, testToBeDone, testLCD);
-			break;
-
-		case TEST_RELAY:
-			//currentState = setNextState(testIndex, testToBeDone, testRELAY);
-			break;
-
-		case TEST_HCSR04:
-			//currentState = setNextState(testIndex, testToBeDone, testHCSR04);
-			break;
-
-		case TEST_DHTxx:
-			//currentState = setNextState(testIndex, testToBeDone, testDHT);
-			break;
-
-		case TEST_MIC:
-			//currentState = setNextState(testIndex, testToBeDone, testMIC);
-			break;
-
-		case TEST_MP3:
-			//currentState = setNextState(testIndex, testToBeDone, testMP3);
-			break;
-
-		case TEST_SDCARD:
-			//currentState = setNextState(testIndex, testToBeDone, testSDCARD);
-			break;
-
-		case TEST_RTCDS:
-			//currentState = setNextState(testIndex, testToBeDone, testRTCDS);
-			break;
-
-		case TEST_LDRxTC:
-			//currentState = setNextState(testIndex, testToBeDone, testLDR);
-			break;
-
-		case TEST_MOTOR:
-			//currentState = setNextState(testIndex, testToBeDone, testMOTOR);
-			break;
-
-		case TEST_LEVELSHIFTER:
-			//currentState = setNextState(testIndex, testToBeDone, testLEVELSHIFTER);
-			break;
-
-		case TEST_DIGITALJ3J34:
-			//currentState = setNextState(testIndex, testToBeDone, testDIGITALJ3J34);
-			break;
-
-		case TEST_END:
-			//currentState=tstDONE;
-			return currentTestResult;
-			break;
-
-		case ERROR:
-			//currentState=tstDONE;
-			return TEST_DONE_ERROR;
-			break;
-
-		case ABORT:
-			//currentState=tstDONE;
-			return TEST_ABORTED;
-			break;
-		}
-
-	}
-}
-
-
-testState setNextState(int& i, tests& testToBeDone, testTypeResult(*currentTest)()) {
-
-	testTypeResult currentTestResult = currentTest();
-	if (currentTestResult.result == TEST_ABORTED)
-		return ABORT;
-
-	if (currentTestResult.result == TEST_DONE_ERROR)
-		return ERROR;
-
-
-	if (currentTestResult.testType == testToBeDone)
-	{
-		return TEST_END;
-	}
-	else
-	{
-		if (i + 1 < sizeof(testSequence) / sizeof(int))
-		{
-			i++;
-			return testSequence[i];
-		}
-		else
-		{
-			return TEST_END;
-		}
-	}
-}
 
 void restoreAllPins() {
 
@@ -215,6 +55,7 @@ testResult abortCurrentTest() {
 	{
 		return TEST_DONE_OK;
 	}
+	return TEST_DONE_OK;
 }
 
 
@@ -309,3 +150,57 @@ void printTestOK(const char* testName) {
 	Serial.println(" OK!");
 	Serial.println();
 }
+
+tests DemoMenu::getMenuItem(int index) {
+	return this->menuItems[index];
+}
+
+int DemoMenu::getMenuItemsN(){
+	return sizeof(this->menuItems) / sizeof(tests);
+}
+
+const char* DemoMenu::getMenuItemString(int index) {
+	return this->menuItemsStr[index];
+}
+
+
+Button::Button(int btnGpio, int debounceInterval)
+	: m_btnGpio{ btnGpio }
+{
+	m_button = Bounce();
+	m_button.attach(m_btnGpio, INPUT_PULLUP); // Attach the debouncer to ENC_SW_GPIO pin with INPUT_PULLUP mode
+	m_button.interval(debounceInterval);
+}
+
+void Button::update() {
+	this->m_button.update();
+}
+
+bool Button::isRising() {
+	return this->m_button.rose();
+}
+
+bool Button::isFalling() {
+	return this->m_button.fell();
+}
+
+bool Button::state() {
+	return this->m_button.read();
+}
+
+
+void initTest(const char* testName) {
+
+	Serial.println("--------------------------");
+	Serial.print("Testing ");
+	Serial.println(testName);
+	Serial.println("--------------------------");
+	Serial.println();
+
+	Serial.print("...start testing ");
+	Serial.println(testName);
+	Serial.println("send 'x' to abort");
+	Serial.println();
+
+}
+

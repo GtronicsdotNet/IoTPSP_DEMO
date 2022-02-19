@@ -4,14 +4,52 @@
  Author:	gtronics
 */
 
-//#include "src\IoTPSP_DEMO_OLED_HMI.h"
+
+#include "SSD1306Wire.h" // legacy include: `#include "SSD1306.h"`
+#include <Wire.h>
+#include "src\IoTPSP_DEMO_pin_definition.h"
 #include "src\IoTPSP_DEMO_serial_HMI.h"
 #include "src\IoTPSP_DEMO_testing.h"
+#include "src\IoTPSP_DEMO_OLED_HMI.h"
+#include "src\Bounce2.h"
+#include "src\IoTPSP_DEMO_POT.h"
+#include "src\IoTPSP_DEMO_TOUCH.h"
+#include "src\IoTPSP_DEMO_LEDs.h"
+#include "src\IoTPSP_DEMO_RTC.h"
+#include "src\IoTPSP_DEMO_RELAY.h"
+#include "src\IoTPSP_DEMO_HCSR04.h"
+#include "src\IoTPSP_DEMO_DHT.h"
+#include "src\IoTPSP_DEMO_MIC.h"
+#include "src\IoTPSP_DEMO_MP3.h"
 
+SSD1306Wire display(0x3c, I2C_SDA_GPIO, I2C_SCL_GPIO);  //display(address, SDA, SCL)
+
+OledHmi ui(&display);
+int encoderPosition = 0;
+bool firstRun = true;
+bool runDemo = false;
+bool encoderLastA = LOW;
+bool currentEncA = LOW;
+bool EncoderPositionChangedFlag = false;
+DemoMenu mainMenu;
+tests demoSelection;
+unsigned long lastEncChange = 0;
+Button encoderSwitch(ENC_SW_GPIO, 25);
 
 
 // the setup function runs once when you press reset or power the board
 void setup() {
+	bool proceed = false;
+	unsigned long lastDisplayToggle = 0;
+	bool displayLastRow = true;
+
+	//setup encoder pins
+	pinMode(ENC_A_GPIO, INPUT_PULLUP);
+	pinMode(ENC_B_GPIO, INPUT_PULLUP);
+	//pinMode(ENC_SW_GPIO, INPUT_PULLUP);
+	//encSW.attach(ENC_SW_GPIO,INPUT_PULLUP); // Attach the debouncer to ENC_SW_GPIO pin with INPUT_PULLUP mode
+	//encSW.interval(25); // Use a debounce interval of 25 milliseconds
+	//attachInterrupt(digitalPinToInterrupt(ENC_A_GPIO), handleEncoderArisingEdge, RISING);
 
 	Serial.begin(115200);
 	Serial.println();
@@ -21,87 +59,85 @@ void setup() {
 	Serial.println();
 	printSerialHMI();
 	Serial.println();
+
+	ui.init();
+	
+
+	while (!proceed)
+	{
+		if (millis() - lastDisplayToggle > 750)
+		{
+			ui.displayWelcomeScreen(displayLastRow);
+			displayLastRow = !displayLastRow;
+			lastDisplayToggle = millis();
+		}
+
+		encoderSwitch.update();
+		if (encoderSwitch.isRising())
+			proceed = true;
+	}
+
+	//delay(500);
+	encoderPosition = 0;
 }
 
 
 // the loop function runs over and over again until power down or reset
 void loop() {
-	testResult tr = TEST_DONE_OK;
+
+
 	if (Serial.available()) {
 		byte read = Serial.read();
-		tr = TEST_RUNNING;
 		if (read != 0xD) {
+			//runDemo = true;
 			switch (read) {
-			case 'a':
-				//risultatoTest = testIoTPSP(ALL);
-				break;
-
+				
 			case 'p':
-				tr = testIoTPSP(POT);
+				testPOT(&ui, &encoderSwitch);
 				break;
 
 			case 'l':
-				tr = testIoTPSP(LEDs);
+				testLEDs(&ui, &encoderSwitch);
 				break;
 
 			case 't':
-				tr = testIoTPSP(TOUCH);
-				break;
-
-			case 'e':
-				tr = testIoTPSP(ENCODER);
-				break;
-
-			case 'o':
-				tr = testIoTPSP(OLED);
-				break;
-
-			case 'c':
-				//risultatoTest = testIoTPSP(LCD);
-				break;
-
-			case 'r':
-				//risultatoTest = testIoTPSP(RELAY);
-				break;
-
-			case 'h':
-				//risultatoTest = testIoTPSP(HCSR04);
-				break;
-
-			case 'd':
-				//risultatoTest = testIoTPSP(DHTxx);
-				break;
-
-			case 'm':
-				//risultatoTest = testIoTPSP(MIC);
-				break;
-
-			case 'y':
-				//risultatoTest = testIoTPSP(MP3);
-				break;
-
-			case 's':
-				//risultatoTest = testIoTPSP(SDCARD);
+				testTOUCH(&ui, &encoderSwitch);
 				break;
 
 			case 'z':
-				//risultatoTest = testIoTPSP(RTCDS);
+				testRTCDS(&ui, &encoderSwitch);
+				break;
+
+			case 'r':
+				testRELAY(&ui, &encoderSwitch);
+				break;
+
+			case 'h':
+				testHCSR04(&ui, &encoderSwitch);
+				break;
+
+			case 'd':
+				testDHT(&ui, &encoderSwitch);
+				break;
+
+			case 'm':
+				testMIC(&ui, &encoderSwitch);
+				break;
+
+			case 'y':
+				testMP3(&ui, &encoderSwitch);
+				break;
+
+			case 's':
+				//testSDCARD
 				break;
 
 			case 'n':
-				//risultatoTest = testIoTPSP(LDRxTC);
+				//testLDR
 				break;
 
 			case 'w':
-				//risultatoTest = testIoTPSP(MOTOR);
-				break;
-
-			case 'q':
-				//risultatoTest = testIoTPSP(LEVELSHIFTER);
-				break;
-
-			case 'u':
-				//risultatoTest = testIoTPSP(DIGITALJ3J34);
+				//testMOTOR
 				break;
 
 			default:
@@ -113,39 +149,82 @@ void loop() {
 			}
 
 			Serial.flush();
-
-			if (tr == TEST_DONE_OK) { //OK
-			  //no error
-				Serial.println();
-				Serial.print("******** Done OK! ********");
-				Serial.println();
-			}
-
-			if (tr == TEST_DONE_ERROR) { //ERROR
-			  //ERROR
-				Serial.println();
-				Serial.println("******** Done ERROR ********");
-				Serial.println();
-			}
-
-			if (tr == TEST_ABORTED) { //ABORT
-			  //ABORT
-				Serial.println();
-				Serial.println("******** ABORTED ********");
-				Serial.println();
-			}
-
-			if (tr != TEST_RUNNING) {
-				Serial.println();
-				Serial.print("To restart the testing procedure ");
-				Serial.println();
-				printSerialHMI();
-			}
-
 			Serial.println();
 			Serial.println();
 		}
 	}
 
+
+	//if ((millis() - lastEncChange) > 10)
+	{
+
+		currentEncA = digitalRead(ENC_A_GPIO);
+		if ((encoderLastA == LOW) && (currentEncA == HIGH))
+		{
+			if (digitalRead(ENC_B_GPIO) == LOW) {
+				encoderPosition++;
+			}
+			else {
+				encoderPosition--;
+			}
+			lastEncChange = millis();
+		}
+		encoderLastA = currentEncA;
+	}
+
+	if (encoderPosition < 0)
+		encoderPosition = 0;
+
+	if (encoderPosition > mainMenu.getMenuItemsN() - 1)
+		encoderPosition = mainMenu.getMenuItemsN() - 1;
+
+	if (firstRun)
+		encoderPosition = 0;
+
+	firstRun = false;
+
+	ui.displaySelectionScreen(encoderPosition);
+
+	encoderSwitch.update();
+
+
+	if (encoderSwitch.isRising())
+	{
+		demoSelection = mainMenu.getMenuItem(encoderPosition);
+		runDemo = true;
+	}
+
+	if (runDemo) {
+		if (demoSelection == LEDs) testLEDs(&ui, &encoderSwitch);
+		if (demoSelection == POT) testPOT(&ui, &encoderSwitch);
+		if (demoSelection == TOUCH) testTOUCH(&ui, &encoderSwitch);
+		if (demoSelection == RTCDS) testRTCDS(&ui, &encoderSwitch);
+		if (demoSelection == RELAY) testRELAY(&ui, &encoderSwitch);
+		if (demoSelection == HCSR04) testHCSR04(&ui, &encoderSwitch);
+		if (demoSelection == DHTxx) testDHT(&ui, &encoderSwitch);
+		if (demoSelection == MIC) testMIC(&ui, &encoderSwitch);
+		if (demoSelection == MP3) testMP3(&ui, &encoderSwitch);
+
+		runDemo = false;
+	}
+
+}
+
+void handleEncoderArisingEdge() {
+
+	if (digitalRead(ENC_B_GPIO) == LOW) {
+		encoderPosition++;
+	}
+	else {
+		encoderPosition--;
+	}
+
+	if (encoderPosition < 0)
+		encoderPosition = mainMenu.getMenuItemsN()-1;
+
+	if (encoderPosition > mainMenu.getMenuItemsN()-1)
+		encoderPosition = 0;
+
+	EncoderPositionChangedFlag = true;
 }
 

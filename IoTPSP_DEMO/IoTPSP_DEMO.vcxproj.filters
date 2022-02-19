@@ -42,16 +42,34 @@
     <ClInclude Include="src\IoTPSP_DEMO_testSequence.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\IoTPSP_DEMO_LEDs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\IoTPSP_DEMO_ENC.h">
+    <ClInclude Include="src\IoTPSP_DEMO_OLED_HMI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\IoTPSP_DEMO_TOUCH.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\IoTPSP_DEMO_OLED_HMI.h">
+    <ClInclude Include="src\IoTPSP_DEMO_LEDs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Bounce2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\IoTPSP_DEMO_RTC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\IoTPSP_DEMO_RELAY.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\IoTPSP_DEMO_HCSR04.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\IoTPSP_DEMO_DHT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\IoTPSP_DEMO_MIC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\IoTPSP_DEMO_MP3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -65,16 +83,34 @@
     <ClCompile Include="src\IoTPSP_DEMO_POT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\IoTPSP_DEMO_LEDs.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\IoTPSP_DEMO_ENC.cpp">
+    <ClCompile Include="src\IoTPSP_DEMO_OLED_HMI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\IoTPSP_DEMO_TOUCH.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\IoTPSP_DEMO_OLED_HMI.cpp">
+    <ClCompile Include="src\IoTPSP_DEMO_LEDs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Bounce2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IoTPSP_DEMO_RTC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IoTPSP_DEMO_RELAY.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IoTPSP_DEMO_HCSR04.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IoTPSP_DEMO_DHT.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IoTPSP_DEMO_MIC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IoTPSP_DEMO_MP3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

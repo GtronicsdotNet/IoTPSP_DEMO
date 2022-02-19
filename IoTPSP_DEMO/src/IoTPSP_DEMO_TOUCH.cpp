@@ -9,73 +9,44 @@
 
 //**************** test TOUCH **********************
 
-testTypeResult testTOUCH() {
+testResult testTOUCH(OledHmi* ui, Button* encoderSwitch) {
 
-    constexpr tests testType = TOUCH;
+    bool exitDemo = false;
 
-    //pinMode(RED_LED, OUTPUT);
-    //pinMode(GRN_LED, OUTPUT);
     pinMode(TOUCH_BUTTON_GPIO, INPUT);
 
-    enum testStates {
-        TOUCH_OFF,
-        TOUCH_ON,
-        TOUCH_OK,
-        TOUCH_ABORT,
-        TOUCH_ERR
-    };
+	const char* title = "TOUCH DEMO";
+	const char* description = "TOUCH state = ";
 
-    testStates testState = TOUCH_OFF;
+	Serial.print(title);
+	Serial.println("press ENC switch to exit");
+	Serial.println("send 'x' to exit");
+	Serial.println();
 
-    Serial.print("Testing TOUCH: touch the touch pad");
-    Serial.println();
-
-
-    Serial.print("Current touch pad state is: ");
-
-    bool currTouchState = digitalRead(TOUCH_BUTTON_GPIO);
-
-    if (currTouchState)
-    {
-        Serial.println("TOUCH ON");
-        Serial.println();
-        Serial.print("!!! ERROR !!! : ");
-        Serial.println("TOUCH MUST BE OFF TO START TOUCH TEST");
-        Serial.println();
-        testState = TOUCH_ERR;
-        return { testType, TEST_DONE_ERROR };
-    }
-    else
-    {
-        Serial.println("TOUCH OFF");
-        //all ok proceed with testing
-        testState = TOUCH_OFF;
-    }
-
-    while (testState != TOUCH_OK) {
+    while (!exitDemo) {
         //state machine
-        currTouchState = digitalRead(TOUCH_BUTTON_GPIO); //read current touch state
+        bool currTouchState = digitalRead(TOUCH_BUTTON_GPIO); //read current touch state
 
-        if (abortCurrentTest())
-            return { testType, TEST_ABORTED };
+		Serial.print(description);
+		Serial.print(currTouchState);
+		Serial.println();
 
-        switch (currTouchState) {
-        case HIGH: //touch is on
-            testState = TOUCH_OK;
-            break;
+		ui->displayDemoScreen(title, description, String(currTouchState));
 
-        case LOW: //touch is off
-            break;
-        }
+		if (abortCurrentTest())
+			exitDemo = true;
+
+		encoderSwitch->update();
+		if(encoderSwitch->isRising())
+			exitDemo = true;
+
+		delay(50);
+
+
     }
 
-    Serial.println();
-    Serial.println("TOUCH OK!");
-    Serial.println();
-
-    return { testType, TEST_DONE_OK };
-
-
+	restoreUsedPins(ENC_SW_GPIO, TOUCH_BUTTON_GPIO);
+	return TEST_DONE_OK;
 }
 
 

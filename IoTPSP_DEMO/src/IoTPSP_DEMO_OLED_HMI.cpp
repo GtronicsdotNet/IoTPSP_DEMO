@@ -2,10 +2,10 @@
 //
 //
 
+#include "IoTPSP_DEMO_OLED_HMI.h"
 #include "IoTPSP_DEMO_board_definition.h"
 //#include "arduino.h"
-#include <SPI.h>
-#include <Wire.h>
+
 
 #ifdef TEST_ARDUINO_NANO
 	//#include <Adafruit_GFX.h>
@@ -17,104 +17,152 @@
 //#include "OLEDDisplayUi.h"
 #endif
 
-#include "IoTPSP_DEMO_OLED_HMI.h"
-
-#define OLED_RESET -1
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
-
-testTypeResult testOLED() {
-
-	constexpr tests testType = OLED;
-	const char* testName = "OLED";
-
-	pinMode(ENC_SW_GPIO, INPUT_PULLUP);
-
-	if (initTest(testName) == TEST_ABORTED)
-		return { testType, TEST_ABORTED };
-
-#ifdef TEST_ARDUINO_NANO
-	Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-
-	// by default, we'll generate the high voltage from the 3.3v line internally! (neat!)
-	if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3c))  // Address 0x3c for 128x64
-	{
-		Serial.println("SSD1306 allocation failed");
-		Serial.println();
-
-		return { testType, TEST_DONE_ERROR };
-	}
-	else
-	{
-		// init done
-
-		// Clear the buffer.
-		display.clearDisplay();
-
-		// text display tests
-		display.setTextSize(2);
-		display.setTextColor(WHITE);
 
 
-		for (int i; i < 10; i++) {
-
-			display.setCursor(0, 0);
-			display.println("Gtronics");
-			display.println();
-			display.println(i);
-			display.display();
-			delay(30);
-
-			display.clearDisplay();
-			display.display();
-			delay(30);
-		}
-
-		display.setCursor(0, 0);
-		display.println("Gtronics");
-		display.println();
-		display.println("OLED OK!");
-		display.display();
-	}
-
-#endif
-
-#ifdef TEST_WEMOS_D1_MINI_ESP32
-	SSD1306Wire display(0x3c, I2C_SDA_GPIO, I2C_SCL_GPIO);  //display(address, SDA, SCL)
-
-	display.init();
-
-	display.flipScreenVertically();
-	display.setTextAlignment(TEXT_ALIGN_LEFT);
-	display.setFont(ArialMT_Plain_24);
-
-	display.clear();
-
-	for (int i = 0; i < 10; i++) {
-		display.clear();
-		display.drawString(0, 0, "Gtronics");
-		display.drawString(0, 25, String(i));
-		display.display();
-		delay(100);
-	}
-
-	display.clear();
-	display.drawString(0, 0, "Gtronics");
-	display.drawString(0, 25, "OLED OK!");
-	display.display();
-
-#endif
-
-	while (digitalRead(ENC_SW_GPIO))
-	{
-		if (abortCurrentTest())
-			return { testType, TEST_ABORTED };
-	}
-
-
-	printTestOK(testName);
-
-	return { testType, TEST_DONE_OK };
-
-
+OledHmi::OledHmi(OLEDDisplay* display) {
+	this->m_display = display;
 }
+
+void OledHmi::init() {
+	this->m_display->init();
+	this->m_display->flipScreenVertically();
+	this->m_RowPositionPix = 0;
+	this->m_currentRowIndex = 0;
+}
+
+void OledHmi::initRowPositionPix(int firstRowPix, int incrementPix) {
+	this->m_RowPositionPix = 0;
+	this->m_currentRowIndex = 0;
+	this->m_firstRowPix = firstRowPix;
+	this->m_incrementPix = incrementPix;
+}
+
+void OledHmi::setRowPositionPix(int offsetPix) {
+	this->m_RowPositionPix = m_firstRowPix + m_incrementPix * m_currentRowIndex + offsetPix;
+	this->m_currentRowIndex++;
+}
+
+
+int OledHmi::getRowPositionPix() {
+	return this->m_RowPositionPix;
+}
+
+void OledHmi::displayWelcomeScreen(bool displayLastRow) {
+
+	constexpr int leftIndentPix = 0;
+	constexpr int firstRowPix = 0;
+	constexpr int lastRowPix = 53;
+	constexpr int incRowPix = 10;
+
+	this->initRowPositionPix(firstRowPix, incRowPix);
+
+	this->m_display->clear();
+	this->m_display->setTextAlignment(TEXT_ALIGN_LEFT); //TEXT_ALIGN_CENTER
+	this->m_display->setFont(ArialMT_Plain_10);
+
+	this->setRowPositionPix();
+	this->m_display->drawString(leftIndentPix + 23, this->getRowPositionPix(), "GtronicsShop.com");
+
+	this->setRowPositionPix();
+	this->m_display->drawString(leftIndentPix + 36, this->getRowPositionPix(), "Gtronics.NET");
+
+	this->setRowPositionPix(1);
+	this->m_display->drawString(leftIndentPix + 40 , this->getRowPositionPix(), "HI DAVE!");
+
+	this->setRowPositionPix();
+	this->m_display->drawString(leftIndentPix + 10, this->getRowPositionPix(), "Thanks for testing the");
+
+	this->setRowPositionPix(1);
+	this->m_display->drawString(leftIndentPix + 0, this->getRowPositionPix(), "IoT PROTO SHIELD PLUS!");
+
+	if (displayLastRow)
+		this->m_display->drawString(leftIndentPix + 5, lastRowPix, "press ENC switch to start");
+
+	this->m_display->display();
+}
+
+
+void OledHmi::displayDemoScreen(const char* title, const char* description, String value, const char* instruction) {
+	constexpr int leftIndentPix = 0;
+	constexpr int firstRowPix = 0;
+	constexpr int lastRowPix = 53;
+	constexpr int incRowPix = 12;
+	
+	this->initRowPositionPix(firstRowPix, incRowPix);
+
+	
+	this->m_display->clear();
+	this->m_display->setTextAlignment(TEXT_ALIGN_LEFT); //TEXT_ALIGN_CENTER
+	this->m_display->setFont(ArialMT_Plain_10);
+	
+	this->setRowPositionPix();
+	this->m_display->drawString(leftIndentPix, this->getRowPositionPix(), String(title));
+	
+	
+	if (instruction)
+	{
+		this->setRowPositionPix();
+		this->m_display->drawString(leftIndentPix, this->getRowPositionPix(), instruction);
+	}
+	
+	this->setRowPositionPix(2);
+	this->m_display->drawString(leftIndentPix, this->getRowPositionPix(), String(description));
+	
+	this->setRowPositionPix();
+	this->m_display->drawString(leftIndentPix, this->getRowPositionPix(), value);
+
+
+	this->m_display->drawString(leftIndentPix, lastRowPix, "press ENC switch to exit");
+
+	this->m_display->display();
+}
+
+void OledHmi::displaySelectionScreen(int selection) {
+	DemoMenu menu;
+	constexpr int leftIndent = 10;
+	constexpr int firstRow = 22;
+	constexpr int incRow = 10;
+	constexpr int listLenght = 3;
+
+	this->m_display->clear();
+	this->m_display->setTextAlignment(TEXT_ALIGN_LEFT); //TEXT_ALIGN_CENTER
+
+	//display selection number
+	//this->m_display->setFont(ArialMT_Plain_16);
+	//this->m_display->drawString(0, 0, String(selection));
+
+	//display instructions
+	this->m_display->setFont(ArialMT_Plain_10);
+	this->m_display->drawString(0, 0, "Rotate encoder to scroll");
+	this->m_display->drawString(0, 10, "click to select the DEMO");
+
+	//Display list
+	this->m_display->setFont(ArialMT_Plain_10);
+
+	//get first item
+	int firstItem = selection - listLenght + 1;
+	if (firstItem < 0)
+		firstItem = 0;
+
+	int lastItem = firstItem + listLenght - 1;
+
+	for (int i = 0; i < listLenght; i++)
+	{
+		this->m_display->drawString(leftIndent, firstRow+incRow*i, String(menu.getMenuItemString(i+firstItem)));
+	}
+
+	// display selection
+	int markerRow = selection;
+	if (markerRow > listLenght - 1)
+		markerRow = listLenght - 1;
+
+	//this->m_display->drawString(0, firstRow + incRow * markerRow, String(selection));
+	this->m_display->drawString(0, firstRow + incRow * markerRow, ">");
+
+
+
+	this->m_display->display();
+}
+
+
+

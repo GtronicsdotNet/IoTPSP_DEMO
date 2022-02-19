@@ -17,5 +17,3 @@ The on-board devices and plug and play modules included in this test scketch are
 - plug and play MICROPHONE MAX 9814 module
 - plug and play MP3 DF-PLAYER MINI
 
-ENCODER is implemented in "simple mode" (doesn't use interrupts)
-
