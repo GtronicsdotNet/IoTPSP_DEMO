@@ -1,10 +1,14 @@
 # IoTPSP_DEMO
 Demo sketch useful to test the IoT Proto Shield Plus on-board features and Plug and Play modules
 
+Ver 1.1
+-------
+Minor improvements on the displaying of the selection list
+
 Ver 1.0
 -------
 It works with a ESP32 D1 MINI controller board.
-The on-board devices and plug and play modules included in this test scketch are:
+The on-board devices and plug and play modules included in this test sketch are:
 - plug and play OLED DISPLAY SSD1306 128x64 module (needed to display the UI)
 - on-board ENCODER (used to navigate the UI on the OLED DISPLAY)
 - on-board LEDs

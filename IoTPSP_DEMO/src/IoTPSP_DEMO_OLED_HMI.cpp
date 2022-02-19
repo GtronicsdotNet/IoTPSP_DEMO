@@ -21,6 +21,11 @@
 
 OledHmi::OledHmi(OLEDDisplay* display) {
 	this->m_display = display;
+	//m_currentMarkerRow = 0;
+	//m_itemsListLenght = 3;
+	//m_firstListItem = 0;
+	//m_lastListItem = m_itemsListLenght -1;
+	
 }
 
 void OledHmi::init() {
@@ -122,7 +127,7 @@ void OledHmi::displaySelectionScreen(int selection) {
 	constexpr int leftIndent = 10;
 	constexpr int firstRow = 22;
 	constexpr int incRow = 10;
-	constexpr int listLenght = 3;
+	
 
 	this->m_display->clear();
 	this->m_display->setTextAlignment(TEXT_ALIGN_LEFT); //TEXT_ALIGN_CENTER
@@ -139,6 +144,55 @@ void OledHmi::displaySelectionScreen(int selection) {
 	//Display list
 	this->m_display->setFont(ArialMT_Plain_10);
 
+	//int m_currentMarkerRow;
+	//int m_firstListItem;
+	//int m_lastListItem;
+	//int m_listItemLenght;
+	//m_firstItem = selection - m_currentMarkerRow;
+	//m_lastItem = m_firstItem + m_itemsListLenght;
+
+	if (selection > m_lastSelection)
+	{
+		if (m_currentMarkerRow < m_itemsListLenght - 1)
+		{
+			//move the marker
+			m_currentMarkerRow++;
+		}
+		else
+		{
+			//move the list
+			m_firstItem = selection - m_currentMarkerRow;
+			m_lastItem = m_firstItem + m_itemsListLenght;
+		}
+	}
+
+	if (selection < m_lastSelection)
+	{
+		if (m_currentMarkerRow > 0)
+		{
+			//move the marker
+			m_currentMarkerRow--;
+		}
+		else
+		{
+			//move the list
+			m_firstItem = selection - m_currentMarkerRow;
+			m_lastItem = m_firstItem + m_itemsListLenght;
+		}
+	}
+
+	
+
+	for (int i = 0; i < m_itemsListLenght; i++)
+	{
+		this->m_display->drawString(leftIndent, firstRow + incRow * i, String(menu.getMenuItemString(i + m_firstItem)));
+	}
+
+	//this->m_display->drawString(0, firstRow + incRow * m_currentMarkerRow, String(selection)); //just for debug
+	this->m_display->drawString(0, firstRow + incRow * m_currentMarkerRow, ">");
+
+	/*
+	constexpr int listLenght = 3;
 	//get first item
 	int firstItem = selection - listLenght + 1;
 	if (firstItem < 0)
@@ -156,12 +210,15 @@ void OledHmi::displaySelectionScreen(int selection) {
 	if (markerRow > listLenght - 1)
 		markerRow = listLenght - 1;
 
-	//this->m_display->drawString(0, firstRow + incRow * markerRow, String(selection));
-	this->m_display->drawString(0, firstRow + incRow * markerRow, ">");
-
+	//display marker
+	this->m_display->drawString(0, firstRow + incRow * markerRow, String(selection));
+	//this->m_display->drawString(0, firstRow + incRow * markerRow, ">");
+	*/
 
 
 	this->m_display->display();
+
+	m_lastSelection = selection;
 }
 
 

@@ -51,15 +51,15 @@ private:
 	};
 
 	const char* menuItemsStr[nItems] = {
-		"LEDs",
-		"TOUCH",
-		"POT",
-		"RTC",
-		"RELAY",
-		"HC-SR04",
-		"DHT22",
-		"MIC MAX9814",
-		"MP3 PLAYER"
+		"1 - LEDs",
+		"2 - TOUCH",
+		"3 - POT",
+		"4 - RTC",
+		"5 - RELAY",
+		"6 - HC-SR04",
+		"7 - DHT22",
+		"8 - MIC MAX9814",
+		"9 - MP3 PLAYER"
 		//"LDR/xTC",
 		//"SDCARD",
 		//"SERVO",

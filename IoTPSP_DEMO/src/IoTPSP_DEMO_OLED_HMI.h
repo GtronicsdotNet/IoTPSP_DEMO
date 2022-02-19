@@ -22,6 +22,14 @@ private:
 	int m_incrementPix;
 	int m_currentRowIndex;
 
+	int m_currentMarkerRow = 0;
+	int m_itemsListLenght = 3;
+	int m_firstListItem = 0;;
+	int m_lastListItem = m_itemsListLenght - 1;
+	int m_lastSelection = 0;
+	int m_firstItem;
+	int m_lastItem;
+
 public:
 	OledHmi(OLEDDisplay* display);
 	void init();
