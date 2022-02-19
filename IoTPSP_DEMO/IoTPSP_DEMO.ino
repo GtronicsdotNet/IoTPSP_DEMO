@@ -35,6 +35,12 @@ DemoMenu mainMenu;
 tests demoSelection;
 unsigned long lastEncChange = 0;
 Button encoderSwitch(ENC_SW_GPIO, 25);
+int encoderSelection = 0;
+bool encoderInterruptArmed = false;
+int encoderDirection = 0;
+
+//Button encoderA(ENC_A_GPIO, 1);
+//Button encoderB(ENC_B_GPIO, 1);
 
 
 // the setup function runs once when you press reset or power the board
@@ -46,10 +52,9 @@ void setup() {
 	//setup encoder pins
 	pinMode(ENC_A_GPIO, INPUT_PULLUP);
 	pinMode(ENC_B_GPIO, INPUT_PULLUP);
-	//pinMode(ENC_SW_GPIO, INPUT_PULLUP);
-	//encSW.attach(ENC_SW_GPIO,INPUT_PULLUP); // Attach the debouncer to ENC_SW_GPIO pin with INPUT_PULLUP mode
-	//encSW.interval(25); // Use a debounce interval of 25 milliseconds
-	//attachInterrupt(digitalPinToInterrupt(ENC_A_GPIO), handleEncoderArisingEdge, RISING);
+
+	attachInterrupt(digitalPinToInterrupt(ENC_A_GPIO), handleEncoderArisingEdge, RISING);
+	encoderInterruptArmed = true;
 
 	Serial.begin(115200);
 	Serial.println();
@@ -154,7 +159,7 @@ void loop() {
 		}
 	}
 
-
+	/*
 	//if ((millis() - lastEncChange) > 10)
 	{
 
@@ -171,23 +176,59 @@ void loop() {
 		}
 		encoderLastA = currentEncA;
 	}
+	*/
 
-	if (encoderPosition < 0)
-		encoderPosition = 0;
+	/*
+	encoderA.update();
+	encoderB.update();
+	currentEncA = encoderA.state();
+	if ((encoderLastA == LOW) && (currentEncA == HIGH))
+	{
+		if (encoderB.state() == LOW) {
+			encoderPosition++;
+		}
+		else {
+			encoderPosition--;
+		}
+	}
+	encoderLastA = encoderA.state();;
 
-	if (encoderPosition > mainMenu.getMenuItemsN() - 1)
-		encoderPosition = mainMenu.getMenuItemsN() - 1;
+	*/
+
+	if (EncoderPositionChangedFlag)
+	{
+		lastEncChange = millis();
+		detachInterrupt(digitalPinToInterrupt(ENC_A_GPIO));
+		encoderInterruptArmed = false;
+		Serial.println(encoderPosition);
+
+		encoderSelection += encoderDirection;
+		encoderDirection = 0;
+
+		if (encoderSelection < 0)
+			encoderSelection = 0;
+
+		if (encoderSelection > mainMenu.getMenuItemsN() - 1)
+			encoderSelection = mainMenu.getMenuItemsN() - 1;
+
+		EncoderPositionChangedFlag = false;
+
+	};
+
+	if (millis() - lastEncChange > 200 && !encoderInterruptArmed)
+	{
+		attachInterrupt(digitalPinToInterrupt(ENC_A_GPIO), handleEncoderArisingEdge, RISING);
+		encoderInterruptArmed = true;
+	}
 
 	if (firstRun)
-		encoderPosition = 0;
+		encoderSelection = 0;
 
 	firstRun = false;
 
-	ui.displaySelectionScreen(encoderPosition);
+	ui.displaySelectionScreen(encoderSelection);
 
 	encoderSwitch.update();
-
-
 	if (encoderSwitch.isRising())
 	{
 		demoSelection = mainMenu.getMenuItem(encoderPosition);
@@ -208,22 +249,29 @@ void loop() {
 		runDemo = false;
 	}
 
+
+	
+
 }
 
 void handleEncoderArisingEdge() {
 
+	
+
 	if (digitalRead(ENC_B_GPIO) == LOW) {
 		encoderPosition++;
+		encoderDirection = 1;
 	}
 	else {
 		encoderPosition--;
+		encoderDirection = -1;
 	}
 
-	if (encoderPosition < 0)
-		encoderPosition = mainMenu.getMenuItemsN()-1;
-
-	if (encoderPosition > mainMenu.getMenuItemsN()-1)
-		encoderPosition = 0;
+	//if (encoderPosition < 0)
+	//	encoderPosition = 0;
+	//
+	//if (encoderPosition > mainMenu.getMenuItemsN() - 1)
+	//	encoderPosition = mainMenu.getMenuItemsN() - 1;
 
 	EncoderPositionChangedFlag = true;
 }
