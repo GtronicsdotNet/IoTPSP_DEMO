@@ -80,8 +80,10 @@ void OledHmi::displayWelcomeScreen(bool displayLastRow) {
 	this->setRowPositionPix(1);
 	this->m_display->drawString(leftIndentPix + 0, this->getRowPositionPix(), "IoT PROTO SHIELD PLUS!");
 
-	if (displayLastRow)
+	if (displayLastRow) {
 		this->m_display->drawString(leftIndentPix + 5, lastRowPix, "press ENC switch to start");
+		//this->m_display->drawString(leftIndentPix, lastRowPix, "press ENCODER switch to start");
+	}
 
 	this->m_display->display();
 }
@@ -118,6 +120,7 @@ void OledHmi::displayDemoScreen(const char* title, const char* description, Stri
 
 
 	this->m_display->drawString(leftIndentPix, lastRowPix, "press ENC switch to exit");
+	//this->m_display->drawString(leftIndentPix, lastRowPix, "press ENC switch to exit");
 
 	this->m_display->display();
 }
@@ -139,7 +142,7 @@ void OledHmi::displaySelectionScreen(int selection) {
 	//display instructions
 	this->m_display->setFont(ArialMT_Plain_10);
 	this->m_display->drawString(0, 0, "Rotate encoder to scroll");
-	this->m_display->drawString(0, 10, "click to select the DEMO");
+	this->m_display->drawString(0, 10, "click it to select the DEMO");
 
 	//Display list
 	this->m_display->setFont(ArialMT_Plain_10);

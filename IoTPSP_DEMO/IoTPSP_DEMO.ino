@@ -26,6 +26,7 @@ SSD1306Wire display(0x3c, I2C_SDA_GPIO, I2C_SCL_GPIO);  //display(address, SDA, 
 
 OledHmi ui(&display);
 int encoderPosition = 0;
+//int lastEncoderPosition = 0;
 bool firstRun = true;
 bool runDemo = false;
 bool encoderLastA = LOW;
@@ -36,6 +37,7 @@ unsigned long lastEncChange = 0;
 Button encoderSwitch(ENC_SW_GPIO, 25);
 int encoderSelection = 0;
 int encoderDirection = 0;
+//bool encoderArmed = true;
 
 #define USE_INTERRUPTS	// comment this line to disable interrupts on A and B encoder channels 
 						// and use simple encoder signal handling
@@ -51,8 +53,8 @@ void setup() {
 	pinMode(ENC_B_GPIO, INPUT_PULLUP);
 
 #ifdef USE_INTERRUPTS
-	attachInterrupt(digitalPinToInterrupt(ENC_A_GPIO), handleEncoderAchange, CHANGE);
-	attachInterrupt(digitalPinToInterrupt(ENC_B_GPIO), handleEncoderBchange, CHANGE);
+	//attachInterrupt(digitalPinToInterrupt(ENC_A_GPIO), handleEncoderAchange, FALLING); //CHANGE
+	attachInterrupt(digitalPinToInterrupt(ENC_B_GPIO), handleEncoderBchange, RISING);
 #endif
 
 	Serial.begin(115200);
@@ -175,12 +177,29 @@ void loop() {
 #endif
 
 #ifdef USE_INTERRUPTS
-	if (millis() - lastEncChange > 100) {
+	if (millis() - lastEncChange > 200) {
 		encoderSelection += encoderDirection;
 		encoderDirection = 0;
 		lastEncChange = millis();
 	}
+
+
 #endif
+
+	//if (encoderPosition != lastEncoderPosition)
+	//{
+	//	if (encoderPosition - lastEncoderPosition > 1)
+	//	{
+	//		encoderPosition = lastEncoderPosition +1;
+	//	}
+	//		
+	//	if (encoderPosition - lastEncoderPosition < -1) 
+	//	{
+	//		encoderPosition = lastEncoderPosition - 1;
+	//	}
+	//	Serial.println(encoderPosition);
+	//	lastEncoderPosition = encoderPosition;
+	//}
 	//Serial.println(encoderSelection);
 
 	if (encoderSelection < 0)
@@ -222,76 +241,87 @@ void loop() {
 
 
 void handleEncoderAchange() {
+	bool encB = digitalRead(ENC_B_GPIO);
+	bool encA = digitalRead(ENC_A_GPIO);
 
-	if (digitalRead(ENC_A_GPIO) == HIGH)
 	{
-		if (digitalRead(ENC_B_GPIO) == LOW)
+		if (encA == HIGH)
 		{
-			encoderPosition++;
-			encoderDirection = 1;
+			if (encB == LOW)
+			{
+				encoderPosition++;
+				encoderDirection = 1;
+			}
+			else
+			{
+				encoderPosition--;
+				encoderDirection = -1;
+			}
 		}
 		else
 		{
-			encoderPosition--; 
-			encoderDirection = -1;
+			if (encB == HIGH)
+			{
+				encoderPosition++;
+				encoderDirection = 1;
+			}
+			else
+			{
+				encoderPosition--;
+				encoderDirection = -1;
+			}
 		}
-	}
-	else
-	{
-		if (digitalRead(ENC_B_GPIO) == HIGH)
-		{
-			encoderPosition++;
-			encoderDirection = 1;
-		}
-		else
-		{
-			encoderPosition--;
-			encoderDirection = -1;
-		}
-	}
 
-	if (encoderPosition < 0)
-		encoderPosition = 0;
+		if (encoderPosition < 0)
+			encoderPosition = 0;
 
-	if (encoderPosition > mainMenu.getMenuItemsN() - 1)
-		encoderPosition = mainMenu.getMenuItemsN() - 1;
+		if (encoderPosition > mainMenu.getMenuItemsN() - 1)
+			encoderPosition = mainMenu.getMenuItemsN() - 1;
+
+	}
 }
 
 
 void handleEncoderBchange() {
 
-	if (digitalRead(ENC_B_GPIO) == HIGH)
+	bool encB = digitalRead(ENC_B_GPIO);
+	bool encA = digitalRead(ENC_A_GPIO);
+
 	{
-		if (digitalRead(ENC_A_GPIO) == HIGH)
+		if (encB == HIGH)
 		{
-			encoderPosition++;
-			encoderDirection = 1;
+			if (encA == HIGH)
+			{
+				encoderPosition++;
+				encoderDirection = 1;
+			}
+			else
+			{
+				encoderPosition--;
+				encoderDirection = -1;
+			}
 		}
 		else
 		{
-			encoderPosition--;
-			encoderDirection = -1;
+			if (encA == LOW)
+			{
+				encoderPosition++;
+				encoderDirection = 1;
+			}
+			else
+			{
+				encoderPosition--;
+				encoderDirection = -1;
+			}
 		}
-	}
-	else
-	{
-		if (digitalRead(ENC_A_GPIO) == LOW)
-		{
-			encoderPosition++;
-			encoderDirection = 1;
-		}
-		else
-		{
-			encoderPosition--;
-			encoderDirection = -1;
-		}
-	}
 
-	if (encoderPosition < 0)
-		encoderPosition = 0;
+		if (encoderPosition < 0)
+			encoderPosition = 0;
 
-	if (encoderPosition > mainMenu.getMenuItemsN() - 1)
-		encoderPosition = mainMenu.getMenuItemsN() - 1;
+		if (encoderPosition > mainMenu.getMenuItemsN() - 1)
+			encoderPosition = mainMenu.getMenuItemsN() - 1;
+
+	}
 }
 
 

@@ -1,6 +1,11 @@
 # IoTPSP_DEMO
 Demo sketch useful to test the IoT Proto Shield Plus on-board features and Plug and Play modules
 
+Ver 1.3
+-------
+- Minor fixes to remove encoder spurious detection
+- Minor changes in the UI
+
 Ver 1.2
 -------
 - Merged encoder-enhancement branch into master

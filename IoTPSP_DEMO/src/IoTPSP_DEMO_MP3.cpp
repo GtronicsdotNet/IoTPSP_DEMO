@@ -8,7 +8,7 @@ testResult testMP3(OledHmi* ui, Button* encoderSwitch) {
 	bool exitDemo = false;
 	bool mp3moduleOk = true;
 	int currentFileNumber = 1;
-	constexpr int nFiles = 4;
+	constexpr int nFiles = 3;
 
 	const char* title = "MP3 PLAYER DEMO";
 	const char* description = "Playing mp3 file number ";

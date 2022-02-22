@@ -12,7 +12,7 @@ testResult testRTCDS(OledHmi* ui, Button* encoderSwitch) {
 	unsigned long lastRefresh = 0;
 
 	const char* title = "RTC DEMO";
-	const char* description = "RTC date and time = ";
+	const char* description = "RTC date and time (CET) = ";
 	const char* rtcKoMessage = "Couldn't find RTC";
 	String rtcMessage = String(rtcKoMessage);
 

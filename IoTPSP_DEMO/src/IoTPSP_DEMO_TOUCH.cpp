@@ -17,6 +17,7 @@ testResult testTOUCH(OledHmi* ui, Button* encoderSwitch) {
 
 	const char* title = "TOUCH DEMO";
 	const char* description = "TOUCH state = ";
+	const char* istruction = "Touch the TOUCH to test!";
 
 	Serial.print(title);
 	Serial.println("press ENC switch to exit");
@@ -31,7 +32,7 @@ testResult testTOUCH(OledHmi* ui, Button* encoderSwitch) {
 		Serial.print(currTouchState);
 		Serial.println();
 
-		ui->displayDemoScreen(title, description, String(currTouchState));
+		ui->displayDemoScreen(title, description, String(currTouchState), istruction);
 
 		if (abortCurrentTest())
 			exitDemo = true;

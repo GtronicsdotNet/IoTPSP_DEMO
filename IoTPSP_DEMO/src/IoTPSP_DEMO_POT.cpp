@@ -26,6 +26,7 @@ testResult testPOT(OledHmi* ui, Button* encoderSwitch){
     bool exitPOTDemo = false;
     int curAD = 0; //analog read
     int lastAD = 0; //last analog read
+    const char* istruction = "Rotate POT to test!";
 
     const char* title = "POT DEMO";
     const char* description = "POT position = ";
@@ -47,7 +48,7 @@ testResult testPOT(OledHmi* ui, Button* encoderSwitch){
 			Serial.print(curAD);
 			Serial.println();
 
-            ui->displayDemoScreen(title, description, String(curAD));
+            ui->displayDemoScreen(title, description, String(curAD), istruction);
 
             updateUi = false;
         }
