@@ -1,6 +1,12 @@
 # IoTPSP_DEMO
 Demo sketch useful to test the IoT Proto Shield Plus on-board features and Plug and Play modules
 
+Ver 1.4
+-------
+- added file IoPSP_Compile_Options.h
+	- set custom greetings
+	- define SET_TIME_FROM_HOST_PC
+
 Ver 1.3
 -------
 - Minor fixes to remove encoder spurious detection

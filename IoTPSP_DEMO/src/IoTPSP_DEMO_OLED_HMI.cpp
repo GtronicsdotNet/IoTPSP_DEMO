@@ -5,7 +5,7 @@
 #include "IoTPSP_DEMO_OLED_HMI.h"
 #include "IoTPSP_DEMO_board_definition.h"
 //#include "arduino.h"
-
+#include "IoTPSP_Compile_Options.h"
 
 #ifdef TEST_ARDUINO_NANO
 	//#include <Adafruit_GFX.h>
@@ -54,6 +54,8 @@ int OledHmi::getRowPositionPix() {
 
 void OledHmi::displayWelcomeScreen(bool displayLastRow) {
 
+	Greeting greeting;
+
 	constexpr int leftIndentPix = 0;
 	constexpr int firstRowPix = 0;
 	constexpr int lastRowPix = 53;
@@ -72,7 +74,9 @@ void OledHmi::displayWelcomeScreen(bool displayLastRow) {
 	this->m_display->drawString(leftIndentPix + 36, this->getRowPositionPix(), "Gtronics.NET");
 
 	this->setRowPositionPix(1);
-	this->m_display->drawString(leftIndentPix + 40 , this->getRowPositionPix(), "HI DAVE!");
+	//String hiTo = String(greeting.hiTo);
+	//hiTo.length();
+	this->m_display->drawString(leftIndentPix + greeting.leftIndentOffset , this->getRowPositionPix(), greeting.hiTo);
 
 	this->setRowPositionPix();
 	this->m_display->drawString(leftIndentPix + 10, this->getRowPositionPix(), "Thanks for testing the");

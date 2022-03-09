@@ -1,9 +1,8 @@
 
 #include "IoTPSP_DEMO_RTC.h"
-
 #include "RTClib.h"
+#include "IoTPSP_Compile_Options.h"
 
-#define SET_TIME_FROM_HOST_PC //comment this line if your DS3231 has a battery and the time and and has already 
 
 testResult testRTCDS(OledHmi* ui, Button* encoderSwitch) {
 

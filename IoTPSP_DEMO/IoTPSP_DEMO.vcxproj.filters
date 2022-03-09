@@ -72,6 +72,9 @@
     <ClInclude Include="src\IoTPSP_DEMO_MP3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\IoTPSP_Compile_Options.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\IoTPSP_DEMO_testing.cpp">
